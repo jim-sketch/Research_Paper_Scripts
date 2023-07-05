@@ -1,0 +1,47 @@
+clear
+clc
+
+% Extract Files
+
+folder = fullfile(" Your Directory ");
+
+tds=tabularTextDatastore(folder,"IncludeSubfolders,true,"FileExtensions",".txt"");
+
+% Creating Array of Tables.
+
+ii = 1;
+SDS=[]; % signal data store
+for ii = 1:numel(tds.Files)
+    D=importdata(tds.Files{ii});
+    D=ts.data;
+    SDS=[SDS D(:,2)];
+end
+
+% Creating Time Domain
+
+t=importdata(tds.Files{1});
+t=t.data;
+t=time(:,1);
+
+% Remove DC offset.
+
+ii=1;
+NSD=[]; % normalized signal data
+for ii = 1:width(sds)
+   NSD = [NSD SDS(:,ii)-mean(SDS(:,ii))];
+end
+
+% Align the signals to the risetime
+
+ii=1;
+SDS=[]; % signal data store overwrite
+for ii = 1 : width(SDS)
+    [y1,y2]=alignsignals(NSD(:,1),NDS(:,ii),Method="risetime");
+    delta=length(y2)-501;
+    y2(end-delta:end)=[];
+    SDS=[SDS y2];
+end
+
+Take the average of aligned data.
+
+MSDS=mean(SDS,2); % mean signal data store
